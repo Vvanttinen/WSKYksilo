@@ -1,0 +1,32 @@
+body {
+  font-family: sans-serif;
+  margin: 2rem;
+  background-color: #f0f2f5;
+}
+
+h1 {
+  margin-bottom: 1.5rem;
+}
+
+.restaurant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.restaurant-card {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.restaurant-card:hover {
+  box-shadow: 0 0 0 3px rgba(100, 149, 237, 0.3);
+  border-color: cornflowerblue;
+}
+
+.restaurant-card h2 {
+  margin-top: 0;
+}
