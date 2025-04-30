@@ -2,10 +2,19 @@ body {
   font-family: sans-serif;
   margin: 2rem;
   background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+}
+
+main {
+  width: 100%;
+  max-width: 800px;
+  padding: 0 1rem;
 }
 
 h1 {
   margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .restaurant-list {
@@ -29,4 +38,29 @@ h1 {
 
 .restaurant-card h2 {
   margin-top: 0;
+}
+
+.search-wrapper {
+  position: relative;
+  max-width: 400px;
+  margin-bottom: 1rem;
+}
+
+#search-bar {
+  width: 100%;
+  padding: 0.5rem 0.5rem 0.5rem 2rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.6rem;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  opacity: 0.6;
 }
