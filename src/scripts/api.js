@@ -11,3 +11,16 @@ export async function fetchData(url) {
     throw error;
   }
 }
+
+export async function fetchDailyMenu(id, lang = "en") {
+  try {
+    const response = await fetch(`https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants/daily/${id}/${lang}`);
+    if (!response.ok) {
+      throw new Error(`No menu available for this restaurant.`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.warn(`Menu fetch failed: ${error.message}`);
+    return null; // Return null if the menu fetch fails
+  }
+}
