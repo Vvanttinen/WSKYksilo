@@ -1,7 +1,8 @@
-import {fetchDailyMenu} from './api.js';
-import { createAuthDialog, openAuthDialog } from './auth.js';
+import {fetchDailyMenu, getUserByToken} from './api.js';
+import {createAuthDialog, handleLogout, openAuthDialog} from './auth.js';
+import { setCurrentUser, createProfileDialog, openProfileDialog } from './profile.js';
 
-export function setupPage() {
+export async function setupPage() {
   document.body.innerHTML = '';
 
   const heading = document.createElement('h1');
@@ -9,13 +10,66 @@ export function setupPage() {
   heading.className = 'main-heading';
   document.body.appendChild(heading);
 
-  const authButton = document.createElement('button');
-  authButton.className = 'auth-button';
-  authButton.textContent = 'Login';
-  authButton.addEventListener('click', () => {
-    openAuthDialog();
+  const user = await getUserByToken();
+  if (user) {
+    setCurrentUser(user);
+  }
+
+  // Create profile dropdown (ALWAYS includes all items, show/hide with CSS)
+  const avatarWrapper = document.createElement('div');
+  avatarWrapper.className = 'avatar-wrapper';
+
+  const avatarImg = document.createElement('img');
+  avatarImg.className = 'avatar-img';
+  avatarWrapper.appendChild(avatarImg);
+
+  const dropdownMenu = document.createElement('div');
+  dropdownMenu.className = 'dropdown-menu';
+  dropdownMenu.style.display = 'none';
+
+  const profileOption = document.createElement('div');
+  profileOption.textContent = 'Profile';
+  profileOption.id = 'profile-option';
+  profileOption.addEventListener('click', () => {
+    openProfileDialog();
+    dropdownMenu.style.display = 'none';
   });
-  document.body.appendChild(authButton);
+
+  const logoutOption = document.createElement('div');
+  logoutOption.textContent = 'Logout';
+  logoutOption.id = 'logout-option';
+  logoutOption.addEventListener('click', () => {
+    handleLogout();
+  });
+
+  const loginOption = document.createElement('div');
+  loginOption.textContent = 'Login / Register';
+  loginOption.id = 'login-option';
+  loginOption.addEventListener('click', () => {
+    openAuthDialog();
+    dropdownMenu.style.display = 'none';
+  });
+
+  dropdownMenu.appendChild(profileOption);
+  dropdownMenu.appendChild(logoutOption);
+  dropdownMenu.appendChild(loginOption);
+
+  avatarWrapper.appendChild(dropdownMenu);
+  document.body.appendChild(avatarWrapper);
+
+  // Toggle dropdown on avatar click
+  avatarImg.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!avatarWrapper.contains(e.target)) {
+      dropdownMenu.style.display = 'none';
+    }
+  });
+
+  createProfileDialog();
+  createAuthDialog();
 
   const searchWrapper = document.createElement('div');
   searchWrapper.className = 'search-wrapper';
@@ -50,10 +104,28 @@ export function setupPage() {
   const menuPanel = document.createElement('div');
   menuPanel.className = 'menu-panel';
   menuPanel.id = 'menu-panel';
-  menuPanel.innerHTML = '<p>Select a restaurant to see details here.</p>';
   main.appendChild(menuPanel);
 
-  createAuthDialog();
+  // Apply initial user state
+  updateUserUI(user);
+}
+export function updateUserUI(user) {
+  const avatarImg = document.querySelector('.avatar-img');
+  const profileOption = document.getElementById('profile-option');
+  const logoutOption = document.getElementById('logout-option');
+  const loginOption = document.getElementById('login-option');
+
+  if (user) {
+    avatarImg.src = user.avatarUrl || 'assets/default-avatar.png';
+    profileOption.style.display = 'block';
+    logoutOption.style.display = 'block';
+    loginOption.style.display = 'none';
+  } else {
+    avatarImg.src = 'assets/default-avatar.png';
+    profileOption.style.display = 'none';
+    logoutOption.style.display = 'none';
+    loginOption.style.display = 'block';
+  }
 }
 
 let allRestaurants = []; // Full list of restaurants

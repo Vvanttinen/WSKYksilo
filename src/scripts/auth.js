@@ -1,6 +1,6 @@
 import {createUser, userLogin, checkUserNameAvailability} from './api.js';
-
-let currentUser;
+import {getCurrentUser, setCurrentUser} from './profile.js';
+import {updateUserUI} from './dom.js';
 
 export function createAuthDialog() {
   const dialog = document.createElement('dialog');
@@ -26,6 +26,7 @@ function setupFormHandlers(dialog) {
       const success = await handleLogin();
       if (success) {
         dialog.close();
+        updateUserUI(getCurrentUser());
       }
       loginButton.textContent = 'Login';
       loginButton.disabled = false;
@@ -40,6 +41,7 @@ function setupFormHandlers(dialog) {
       const success = await handleRegister();
       if (success) {
         dialog.close();
+        updateUserUI(getCurrentUser());
       }
       registerButton.textContent = 'Register';
       registerButton.disabled = false;
@@ -80,9 +82,9 @@ function getRegisterForm() {
   return `
     <form method="dialog" class="auth-form">
       <h2>Register</h2>
-      <input id="username" name="username" placeholder="Username" />
-      <input id="password" name="password" type="password" placeholder="Password" />
-      <input id="email" name="email" type="email" placeholder="Email" />
+      <input id="username" name="username" placeholder="Username" required />
+      <input id="password" name="password" type="password" placeholder="Password" required />
+      <input id="email" name="email" type="email" placeholder="Email" required />
       <button id="register-button" type="button">Register</button>
       <button id="switch-button" type="button">Switch to Login</button>
       <button id="cancel-button" type="reset">Cancel</button>
@@ -99,12 +101,11 @@ async function handleLogin() {
     password
   };
 
-  console.log(`Logging in user: ${JSON.stringify(user)}`);
   const userData = await userLogin(user);
   if (!userData) {
     return false;
   } else {
-    currentUser = userData;
+    setCurrentUser(userData);
     return true;
   }
 }
@@ -127,12 +128,17 @@ async function handleRegister() {
     return false;
   }
 
-  console.log(`Registering user: ${JSON.stringify(user)}`);
   const userData = await createUser(user);
   if (!userData) {
     return false;
   } else {
-    currentUser = userData;
+    setCurrentUser(userData);
     return true;
   }
+}
+
+export async function handleLogout() {
+  localStorage.removeItem('token');
+  setCurrentUser(null);
+  updateUserUI(null);
 }

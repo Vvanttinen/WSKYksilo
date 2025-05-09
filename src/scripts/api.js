@@ -77,3 +77,23 @@ export async function userLogin(userData) {
     return null;
   }
 }
+
+export async function getUserByToken() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return null;
+    }
+    const fetchOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer: ${token}`,
+      },
+    }
+    const userResult = await fetchData("https://media2.edu.metropolia.fi/restaurant/api/v1/users/token", fetchOptions);
+    return userResult;
+  } catch (error) {
+    console.warn(`User fetch failed: ${error.message}`);
+    return null;
+  }
+}
