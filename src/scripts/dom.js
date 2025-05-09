@@ -1,4 +1,5 @@
 import {fetchDailyMenu} from './api.js';
+import { createAuthDialog, openAuthDialog } from './auth.js';
 
 export function setupPage() {
   document.body.innerHTML = '';
@@ -7,6 +8,14 @@ export function setupPage() {
   heading.textContent = 'Restaurants';
   heading.className = 'main-heading';
   document.body.appendChild(heading);
+
+  const authButton = document.createElement('button');
+  authButton.className = 'auth-button';
+  authButton.textContent = 'Login';
+  authButton.addEventListener('click', () => {
+    openAuthDialog();
+  });
+  document.body.appendChild(authButton);
 
   const searchWrapper = document.createElement('div');
   searchWrapper.className = 'search-wrapper';
@@ -43,6 +52,8 @@ export function setupPage() {
   menuPanel.id = 'menu-panel';
   menuPanel.innerHTML = '<p>Select a restaurant to see details here.</p>';
   main.appendChild(menuPanel);
+
+  createAuthDialog();
 }
 
 let allRestaurants = []; // Full list of restaurants

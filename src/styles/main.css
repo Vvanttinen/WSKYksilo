@@ -108,3 +108,10 @@ body {
   background-color: white;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
