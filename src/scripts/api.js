@@ -1,10 +1,11 @@
-export async function fetchData(url) {
+export async function fetchData(url, options = {}) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, options);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const data = await response.json();
+    data.statusCode = response.status;
     return data;
   } catch (error) {
     console.error('Error during fetch:', error);
@@ -27,11 +28,12 @@ export async function fetchDailyMenu(id, lang = "en") {
 
 export async function checkUserNameAvailability(userName) {
   try {
-    const response = await fetch(`https://media2.edu.metropolia.fi/restaurant/api/v1/users/available/${userName}`);
-    if (!response.ok) {
-      throw new Error(`User not found.`);
+    const response = await fetchData(`https://media2.edu.metropolia.fi/restaurant/api/v1/users/available/${userName}`);
+    if (response.statusCode === 200) {
+      return response.available;
+    } else {
+      throw new Error(`User name check failed.`);
     }
-    return await response;
   } catch (error) {
     console.warn(`User check failed: ${error.message}`);
     return null;
@@ -40,17 +42,16 @@ export async function checkUserNameAvailability(userName) {
 
 export async function createUser(userData) {
   try {
-    const response = await fetch('https://media2.edu.metropolia.fi/restaurant/api/v1/users', {
+    const fetchOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(userData),
-    });
-    if (!response.ok) {
-      throw new Error(`User creation failed.`);
     }
-    return await response.json();
+    const registerResult = await fetchData('https://media2.edu.metropolia.fi/restaurant/api/v1/users', fetchOptions);
+    console.log(registerResult.activationUrl);
+    return registerResult.data;
   } catch (error) {
     console.warn(`User creation failed: ${error.message}`);
     return null;
@@ -59,20 +60,18 @@ export async function createUser(userData) {
 
 export async function userLogin(userData) {
   try {
-    const response = await fetch('https://media2.edu.metropolia.fi/restaurant/api/v1/auth/login', {
+    const fetchOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(userData),
-    });
-    if (!response.ok) {
-      throw new Error(`Login failed.`);
     }
-    if (response.statusCode === 200) {
-      localStorage.setItem('token', response.token);
+    const loginResult = await fetchData("https://media2.edu.metropolia.fi/restaurant/api/v1/auth/login", fetchOptions);
+    if (loginResult.statusCode === 200) {
+      localStorage.setItem('token', loginResult.token);
     }
-    return await response.json();
+    return loginResult.data;
   } catch (error) {
     console.warn(`Login failed: ${error.message}`);
     return null;

@@ -1,5 +1,7 @@
 import {createUser, userLogin, checkUserNameAvailability} from './api.js';
 
+let currentUser;
+
 export function createAuthDialog() {
   const dialog = document.createElement('dialog');
   dialog.id = 'auth-dialog';
@@ -12,18 +14,37 @@ export function createAuthDialog() {
 export function openAuthDialog() {
   const authDialog = document.getElementById('auth-dialog');
   authDialog.showModal();
+  resetForm();
 }
 
 function setupFormHandlers(dialog) {
-  dialog.querySelector('#login-button')?.addEventListener('click', () => {
-    handleLogin();
-    dialog.close();
-  });
+  const loginButton = dialog.querySelector('#login-button');
+  if (loginButton) {
+    loginButton.addEventListener('click', async () => {
+      loginButton.textContent = 'Loading...';
+      loginButton.disabled = true;
+      const success = await handleLogin();
+      if (success) {
+        dialog.close();
+      }
+      loginButton.textContent = 'Login';
+      loginButton.disabled = false;
+    });
+  }
 
-  dialog.querySelector('#register-button')?.addEventListener('click', () => {
-    handleRegister();
-    dialog.close();
-  });
+  const registerButton = dialog.querySelector('#register-button');
+  if (registerButton) {
+    registerButton.addEventListener('click', async () => {
+      registerButton.disabled = true;
+      registerButton.textContent = 'Loading...';
+      const success = await handleRegister();
+      if (success) {
+        dialog.close();
+      }
+      registerButton.textContent = 'Register';
+      registerButton.disabled = false;
+    });
+  }
 
   dialog.querySelector('#switch-button')?.addEventListener('click', () => {
     const isLogin = dialog.querySelector('h2').textContent === 'Login';
@@ -34,6 +55,12 @@ function setupFormHandlers(dialog) {
   dialog.querySelector('#cancel-button')?.addEventListener('click', () => {
     dialog.close();
   });
+}
+
+function resetForm() {
+  const dialog = document.getElementById('auth-dialog');
+  dialog.innerHTML = getLoginForm();
+  setupFormHandlers(dialog);
 }
 
 function getLoginForm() {
@@ -63,7 +90,7 @@ function getRegisterForm() {
   `;
 }
 
-function handleLogin() {
+async function handleLogin() {
   const username = document.getElementById('username')?.value.trim();
   const password = document.getElementById('password')?.value.trim();
 
@@ -73,10 +100,16 @@ function handleLogin() {
   };
 
   console.log(`Logging in user: ${JSON.stringify(user)}`);
-  userLogin(user);
+  const userData = await userLogin(user);
+  if (!userData) {
+    return false;
+  } else {
+    currentUser = userData;
+    return true;
+  }
 }
 
-function handleRegister() {
+async function handleRegister() {
   const username = document.getElementById('username')?.value.trim();
   const password = document.getElementById('password')?.value.trim();
   const email = document.getElementById('email')?.value.trim();
@@ -86,7 +119,20 @@ function handleRegister() {
     password,
     email
   };
+  console.log("checking username availability");
+  // Check if username is available
+  const isAvailable = await checkUserNameAvailability(username);
+  if (!isAvailable) {
+    alert('Username is already taken. Please choose another one.');
+    return false;
+  }
 
   console.log(`Registering user: ${JSON.stringify(user)}`);
-  createUser(user);
+  const userData = await createUser(user);
+  if (!userData) {
+    return false;
+  } else {
+    currentUser = userData;
+    return true;
+  }
 }
