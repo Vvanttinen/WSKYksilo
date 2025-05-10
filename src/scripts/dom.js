@@ -116,8 +116,9 @@ export function updateUserUI(user) {
   const logoutOption = document.getElementById('logout-option');
   const loginOption = document.getElementById('login-option');
 
+  // Check if the user is valid before trying to access properties
   if (user) {
-    avatarImg.src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
+    avatarImg.src = user.avatar ? "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar : 'assets/default-avatar.png';
     profileOption.style.display = 'block';
     logoutOption.style.display = 'block';
     loginOption.style.display = 'none';
@@ -128,31 +129,31 @@ export function updateUserUI(user) {
     loginOption.style.display = 'block';
   }
 
-  // Update avatar image in profile dialog
+  // Update avatar image in profile dialog, only if user exists
   const profileAvatar = document.getElementById('profile-avatar');
-  if (profileAvatar) {
-    profileAvatar.src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
+  if (profileAvatar && user) {
+    profileAvatar.src = user.avatar ? "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar : 'assets/default-avatar.png';
   }
 
-  // Update display texts in profile dialog
+  // Update display texts in profile dialog if user is defined
   const usernameDisplay = document.getElementById('profile-username-display');
   const emailDisplay = document.getElementById('profile-email-display');
-  if (usernameDisplay) {
+  if (usernameDisplay && user) {
     usernameDisplay.textContent = `Username: ${user.username}`;
   }
-  if (emailDisplay) {
+  if (emailDisplay && user) {
     emailDisplay.textContent = `Email: ${user.email}`;
   }
 
-  // Update avatar image in top-right avatar
+  // Update avatar image in top-right avatar, only if user exists
   const topAvatarImg = document.querySelector('.avatar-img');
-  if (topAvatarImg) {
-    topAvatarImg.src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
+  if (topAvatarImg && user) {
+    topAvatarImg.src = user.avatar ? "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar : 'assets/default-avatar.png';
   }
 
-  // Update dropdown if you show username there
+  // Update dropdown profile text if user exists
   const dropdownProfileOption = document.querySelector('.dropdown-menu .profile-option');
-  if (dropdownProfileOption) {
+  if (dropdownProfileOption && user) {
     dropdownProfileOption.textContent = `Profile (${user.username})`;
   }
 }
