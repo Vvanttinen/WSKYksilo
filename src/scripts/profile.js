@@ -1,7 +1,9 @@
-import {checkUserNameAvailability, updateUser} from './api.js';
+import {checkUserNameAvailability, updateUser, uploadAvatar} from './api.js';
 import {updateUserUI} from './dom.js';
 
 let currentUser = null;
+let selectedAvatarFile = null;
+let isEditing = false;
 
 export function setCurrentUser(user) {
   currentUser = user;
@@ -21,6 +23,7 @@ export function createProfileDialog() {
       <div id="avatar-upload-overlay" class="avatar-upload-overlay" style="display: none;">
         <span>Upload</span>
       </div>
+      <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
     </div>
     <div class="profile-info">
       <div id="profile-username-display"></div>
@@ -39,11 +42,29 @@ export function createProfileDialog() {
 
   document.body.appendChild(dialog);
 
+  const fileInput = dialog.querySelector('#avatar-file-input');
   const editBtn = dialog.querySelector('#edit-profile-btn');
   const saveBtn = dialog.querySelector('#save-profile-btn');
   const cancelBtn = dialog.querySelector('#cancel-profile-btn');
-  const avatar = dialog.querySelector('#profile-avatar');
+  const avatar = dialog.querySelector('.profile-avatar-container');
   const avatarOverlay = dialog.querySelector('#avatar-upload-overlay');
+
+  avatar.addEventListener('click', () => {
+    if (isEditing) {
+      fileInput.click();
+    }
+  });
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      selectedAvatarFile = file;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        avatar.src = event.target.result;  // preview selected image
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   editBtn.addEventListener('click', () => {
     switchToEditMode(true);
@@ -62,7 +83,9 @@ export function createProfileDialog() {
       alert("Please fill in all fields.");
       return;
     }
-    if (updatedUser.username === currentUser.username && updatedUser.email === currentUser.email) {
+    if (updatedUser.username === currentUser.username &&
+        updatedUser.email === currentUser.email &&
+        !selectedAvatarFile) {
       alert("No changes detected.");
       return;
     }
@@ -72,36 +95,42 @@ export function createProfileDialog() {
       return;
     }
 
-    console.log('Save user:', updatedUser);
-    const updatedData = await updateUser(updatedUser);
-    if (updatedData) {
-      setCurrentUser(updatedData);
-      switchToEditMode(false);
-      updateUserUI(getCurrentUser());
-    } else {
-      alert("Failed to update user. Please try again.");
+    try {
+      if (selectedAvatarFile) {
+        const uploadResult = await uploadAvatar(selectedAvatarFile);
+        if (!uploadResult) {
+          alert("Failed to upload avatar. Please try again.");
+          return;
+        }
+      }
+      const updatedData = await updateUser(updatedUser);
+      if (updatedData) {
+        setCurrentUser(updatedData);
+        switchToEditMode(false);
+        selectedAvatarFile = null;
+        updateUserUI(getCurrentUser());
+      } else {
+        alert("Failed to update user. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Error updating user. Please try again.");
     }
   });
 
-  avatar.addEventListener('click', () => {
-    if (editBtn.style.display === 'none') {
-      console.log('Avatar clicked for upload');
-      // TODO - Implement avatar upload functionality
-    }
-  });
+  function switchToEditMode(editing) {
+    isEditing = editing;
+    document.getElementById('profile-username-display').style.display = editing ? 'none' : 'block';
+    document.getElementById('profile-email-display').style.display = editing ? 'none' : 'block';
 
-  function switchToEditMode(isEditing) {
-    document.getElementById('profile-username-display').style.display = isEditing ? 'none' : 'block';
-    document.getElementById('profile-email-display').style.display = isEditing ? 'none' : 'block';
+    document.getElementById('profile-username-input').style.display = editing ? 'block' : 'none';
+    document.getElementById('profile-email-input').style.display = editing ? 'block' : 'none';
 
-    document.getElementById('profile-username-input').style.display = isEditing ? 'block' : 'none';
-    document.getElementById('profile-email-input').style.display = isEditing ? 'block' : 'none';
+    editBtn.style.display = editing ? 'none' : 'inline-block';
+    saveBtn.style.display = editing ? 'inline-block' : 'none';
+    cancelBtn.style.display = editing ? 'inline-block' : 'none';
 
-    editBtn.style.display = isEditing ? 'none' : 'inline-block';
-    saveBtn.style.display = isEditing ? 'inline-block' : 'none';
-    cancelBtn.style.display = isEditing ? 'inline-block' : 'none';
-
-    avatarOverlay.style.display = isEditing ? 'flex' : 'none';
+    avatarOverlay.style.display = editing ? 'flex' : 'none';
   }
 }
 
@@ -113,7 +142,7 @@ export function openProfileDialog(user) {
     return;
   }
 
-  document.getElementById('profile-avatar').src = user.avatar || 'assets/default-avatar.png';
+  document.getElementById('profile-avatar').src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
   document.getElementById('profile-username-display').textContent = `Username: ${user.username}`;
   document.getElementById('profile-email-display').textContent = `Email: ${user.email}`;
 

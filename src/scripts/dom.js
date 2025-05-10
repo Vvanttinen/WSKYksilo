@@ -117,7 +117,7 @@ export function updateUserUI(user) {
   const loginOption = document.getElementById('login-option');
 
   if (user) {
-    avatarImg.src = user.avatarUrl || 'assets/default-avatar.png';
+    avatarImg.src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
     profileOption.style.display = 'block';
     logoutOption.style.display = 'block';
     loginOption.style.display = 'none';
@@ -131,7 +131,7 @@ export function updateUserUI(user) {
   // Update avatar image in profile dialog
   const profileAvatar = document.getElementById('profile-avatar');
   if (profileAvatar) {
-    profileAvatar.src = user.avatarUrl || 'assets/default-avatar.png';
+    profileAvatar.src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
   }
 
   // Update display texts in profile dialog
@@ -147,7 +147,7 @@ export function updateUserUI(user) {
   // Update avatar image in top-right avatar
   const topAvatarImg = document.querySelector('.avatar-img');
   if (topAvatarImg) {
-    topAvatarImg.src = user.avatarUrl || 'assets/default-avatar.png';
+    topAvatarImg.src = "https://media2.edu.metropolia.fi/restaurant/uploads/" + user.avatar || 'assets/default-avatar.png';
   }
 
   // Update dropdown if you show username there

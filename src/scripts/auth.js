@@ -102,6 +102,7 @@ async function handleLogin() {
   };
 
   const userData = await userLogin(user);
+
   if (!userData) {
     return false;
   } else {
@@ -120,7 +121,6 @@ async function handleRegister() {
     password,
     email
   };
-  console.log("checking username availability");
   // Check if username is available
   const isAvailable = await checkUserNameAvailability(username);
   if (!isAvailable) {

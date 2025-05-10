@@ -122,3 +122,28 @@ export async function getUserByToken() {
     return null;
   }
 }
+
+export async function uploadAvatar(file) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return null;
+    }
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer: ${token}`,
+      },
+      mode: 'cors',
+      body: formData,
+    }
+    const uploadResult = await fetchData("https://media2.edu.metropolia.fi/restaurant/api/v1/users/avatar", fetchOptions);
+    return uploadResult;
+  } catch (error) {
+    console.warn(`Avatar upload failed: ${error.message}`);
+    return null;
+  }
+}
