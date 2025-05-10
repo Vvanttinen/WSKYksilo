@@ -78,6 +78,31 @@ export async function userLogin(userData) {
   }
 }
 
+export async function updateUser(userData) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return null;
+    }
+    const fetchOptions = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer: ${token}`,
+      },
+      body: JSON.stringify(userData),
+    }
+    const updateUserResult = await fetchData("https://media2.edu.metropolia.fi/restaurant/api/v1/users", fetchOptions);
+    if (updateUserResult.statusCode === 200) {
+      return updateUserResult.data;
+    }
+    return null;
+  } catch (error) {
+    console.warn(`User update failed: ${error.message}`);
+    return null;
+  }
+}
+
 export async function getUserByToken() {
   try {
     const token = localStorage.getItem('token');

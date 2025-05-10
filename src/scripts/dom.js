@@ -30,8 +30,9 @@ export async function setupPage() {
   const profileOption = document.createElement('div');
   profileOption.textContent = 'Profile';
   profileOption.id = 'profile-option';
+  profileOption.classList.add('profile-option');
   profileOption.addEventListener('click', () => {
-    openProfileDialog();
+    openProfileDialog(user);
     dropdownMenu.style.display = 'none';
   });
 
@@ -125,6 +126,34 @@ export function updateUserUI(user) {
     profileOption.style.display = 'none';
     logoutOption.style.display = 'none';
     loginOption.style.display = 'block';
+  }
+
+  // Update avatar image in profile dialog
+  const profileAvatar = document.getElementById('profile-avatar');
+  if (profileAvatar) {
+    profileAvatar.src = user.avatarUrl || 'assets/default-avatar.png';
+  }
+
+  // Update display texts in profile dialog
+  const usernameDisplay = document.getElementById('profile-username-display');
+  const emailDisplay = document.getElementById('profile-email-display');
+  if (usernameDisplay) {
+    usernameDisplay.textContent = `Username: ${user.username}`;
+  }
+  if (emailDisplay) {
+    emailDisplay.textContent = `Email: ${user.email}`;
+  }
+
+  // Update avatar image in top-right avatar
+  const topAvatarImg = document.querySelector('.avatar-img');
+  if (topAvatarImg) {
+    topAvatarImg.src = user.avatarUrl || 'assets/default-avatar.png';
+  }
+
+  // Update dropdown if you show username there
+  const dropdownProfileOption = document.querySelector('.dropdown-menu .profile-option');
+  if (dropdownProfileOption) {
+    dropdownProfileOption.textContent = `Profile (${user.username})`;
   }
 }
 
